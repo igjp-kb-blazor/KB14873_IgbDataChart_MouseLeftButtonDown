@@ -1,0 +1,2 @@
+# KB14873_IgbDataChart_MouseLeftButtonDown
+ IgbDataChart - クリックしたデータ要素の情報を取得したい
