@@ -1,0 +1,95 @@
+﻿@inject IJSRuntime JSRuntime
+
+﻿<div style="max-width: 800px; margin: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px;">
+    <IgbLegend @ref="_legend"
+               Orientation="LegendOrientation.Horizontal">
+    </IgbLegend>
+    <IgbDataChart Width="100%"
+                  Height="300px"
+                  @ref="chart"
+                  Legend="_legend"
+                  SeriesMouseLeftButtonDown="OnSeriesMouseLeftButtonDown"
+                  ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series">
+        <IgbCategoryXAxis Name="xAxis"
+                          DataSource="_data"
+                          Label="@nameof(SampleData.FormattedYear)">
+        </IgbCategoryXAxis>
+		<IgbNumericYAxis Name="yAxis" Title="年度別売上">
+        </IgbNumericYAxis>
+
+        <IgbStackedColumnSeries Title="Sample1"
+                                Name="Stacked Sample"
+                                DataSource="_data"
+                                XAxisName="xAxis"
+                                YAxisName="yAxis">
+            @foreach (var city in _cities)
+            {
+                <IgbStackedFragmentSeries Name="@city.Name"
+                                          Title="@city.DisplayName"
+                                          ValueMemberPath="@city.ValueMemberPath">
+                </IgbStackedFragmentSeries>
+            }
+        </IgbStackedColumnSeries>
+    </IgbDataChart>
+</div>
+
+@code {
+    private async Task OnSeriesMouseLeftButtonDown(IgbDataChartMouseButtonEventArgs args)
+    {
+        if (args.Item is SampleData item)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", 
+                $"Year: {item.FormattedYear}\n" +
+                $"Tokyo: {item.Tokyo}\n" +
+                $"Osaka: {item.Osaka}\n" +
+                $"Nagoya: {item.Nagoya}\n" +
+                $"Fukuoka: {item.Fukuoka}\n" +
+                $"Sapporo: {item.Sapporo}");
+        }
+    }
+
+    private IgbDataChart? chart;
+    private IgbLegend? _legend;
+    public class SampleData
+    {
+        public int? Year { get; set; }
+		public string? FormattedYear => $"{Year}年";
+        public int Tokyo { get; set; }
+        public int Osaka { get; set; }
+		public int Nagoya { get; set; }
+        public int Fukuoka { get; set; }
+		public int Sapporo { get; set; }
+    }
+    private List<SampleData> _data = new()
+    {
+        new() { Year = 2020, Tokyo = 100, Osaka = 200, Nagoya = 150, Fukuoka = 120, Sapporo = 80 },
+        new() { Year = 2021, Tokyo = 110, Osaka = 210, Nagoya = 160, Fukuoka = 130, Sapporo = 90 },
+        new() { Year = 2022, Tokyo = 120, Osaka = 220, Nagoya = 170, Fukuoka = 140, Sapporo = 100 },
+        new() { Year = 2023, Tokyo = 130, Osaka = 230, Nagoya = 180, Fukuoka = 150, Sapporo = 110 },
+        new() { Year = 2024, Tokyo = 140, Osaka = 240, Nagoya = 190, Fukuoka = 160, Sapporo = 120 }
+    };
+
+    private List<City> _cities = new()
+    {
+        new City { Name = "tokyo", DisplayName = "東京", ValueMemberPath = nameof(SampleData.Tokyo) },
+        new City { Name = "osaka", DisplayName = "大阪", ValueMemberPath = nameof(SampleData.Osaka) },
+        new City { Name = "nagoya", DisplayName = "名古屋", ValueMemberPath = nameof(SampleData.Nagoya) },
+        new City { Name = "fukuoka", DisplayName = "福岡", ValueMemberPath = nameof(SampleData.Fukuoka) },
+        new City { Name = "sapporo", DisplayName = "札幌", ValueMemberPath = nameof(SampleData.Sapporo) }
+    };
+
+    public class City
+    {
+        public string? Name { get; set; }
+        public string? DisplayName { get; set; }
+        public string? ValueMemberPath { get; set; }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();
+        }
+    }
+}
